@@ -4,13 +4,17 @@ from random import random
 import random
 import numpy as np
 
-l = 4 # nlongi
-n = 3
-r = 1 # paso del tweak
+l = 50 # nlongi
+n = 10
+r = 0.2 # paso del tweak
 rango = [-100, 100]
 s = []
 
-for i in range(4):
+# Creacion de las funciones objetivos
+
+# 
+
+for i in range(20):
     s.append(round(random.uniform(-100,100),2))      
 print("Vector solucion inicial:", s)
 
@@ -22,22 +26,34 @@ L.append(s)   # aguegamos la solucion inicial S a la lista tabu
 
 # Evaluamos la funcion objetivo
 
-# funcion de calidad
+# Funcion de calidad (Unimodal Separable)
 
-def funcionEvaluacion (s): 
+def unimodalNoSeparable (s): 
     y = 0
     for i in range(len(s)):
         y = round((s[i]*s[i]) + y, 2)
     return y
 
+# Funcion de evaluacion (unimodal no separable)
+
+def unimodalNoSeparable(s):
+    acum = 0
+    y =0
+    for i in range(len(s)):
+        acum = (s[i]+acum)
+        y = acum*acum + y
+    return(y)
+
+
+
 best = s
 
-for i in range(1,10):
+for i in range(1,100):
 
-    QS = funcionEvaluacion(s)
+    QS = unimodalNoSeparable(s)
     print("Calidad de S: ", QS)
     
-    QBest = funcionEvaluacion(best)
+    QBest = unimodalNoSeparable(best)
     print("Calidad de best: ", QBest)
 
     print("Lista tabu: ", L)
@@ -48,7 +64,7 @@ for i in range(1,10):
     def genracionTW (s):
         tw = []
         for i in range(len(s)):
-            tw.append(random.randint(-1*r,r))
+            tw.append(random.randint(-1,1)*r)
         return tw
 
     # Aplicamos el tweak al vector solucion
@@ -61,7 +77,7 @@ for i in range(1,10):
 
     print(f"Vector R: {R}")
 
-    QR = funcionEvaluacion(R)
+    QR = unimodalNoSeparable(R)
     print(f"calidad de R: {QR}")
 
     W = []
@@ -77,7 +93,7 @@ for i in range(1,10):
         
         # Evaluammos W
         
-        QW = funcionEvaluacion(W)
+        QW = unimodalNoSeparable(W)
         print(f"calidad de W: {QW}")
         
         if (not(W in L) and (QW>QR)) or (R in L):
@@ -96,7 +112,8 @@ for i in range(1,10):
         print("Lista final despues de todo el procedimiento:",L)
 
     if QS > QBest:
-        best = s
         
+        best = s
         print(f"Valor final de R: {R}")
+    print(f"taamaño de la lista: {len(L)}")
         
