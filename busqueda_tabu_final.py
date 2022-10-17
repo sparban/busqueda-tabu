@@ -5,13 +5,13 @@ import math
 import pandas as pd
 import numpy as np
 # Definimos las variables iniciales
-#===================================================
-longitudListaTabu = 50 # longitud de la lista tabu
-n = 10  # numero de vecinos
-r = 0.2 # paso del tweak
-nDim = 20
+#==============================================================================
+longitudListaTabu = 50 # longitud de la lista tabu  (50, 100, 150)
+n = 20  # numero de vecinos  (10, 20)
+r = 1 # paso del tweak  (0.2, 06, 1.0)
+nDim = 20 # numero de dimensiones de la funsion  (20, 50, 100)
 rango = [-100, 100]
-NMEFO = 50000  # maximo numero de evaluaciones de la funcion objetivo
+NMEFO = 5000  # maximo numero de evaluaciones de la funcion objetivo
 cont = 1
 dicc = dict()
 
@@ -74,7 +74,7 @@ def multimodalNoSeparable(s, contEvaluacion):
 def vectorSolution(nDim):
     s= []
     for i in range(nDim):
-        s.append(round(random.uniform(-100,100),2))      
+        s.append(round(random.uniform(-100,100)))      
     #print("Vector solucion inicial:", s)
     return s
 
@@ -120,9 +120,8 @@ def aplicar_tweck (s,tw):
             Generaltwick.append(s[i]+tw[i])
         else:
             Generaltwick.append(s[i])
-    return Generaltwick
-
-
+    #print("Lista de probabilidades", listaProbabillidad)
+    return (Generaltwick)
 
 
 
@@ -134,32 +133,28 @@ for z in range(0,30):
     L = []
     contEvaluacion = 0   # variable para almacenar la NMEFO
     s = vectorSolution(nDim)
+    #print("Vector S inicial", s)
     L.append(s)   # agregamos la solucion inicial S a la lista tabu
     best = s
-    QBest = 1000
+
+    calidadParada = unimodalSeparable(s, contEvaluacion)
+    QS = calidadParada[0]
+    
+    calidadParada = unimodalSeparable(best, contEvaluacion)
+    QBest = calidadParada[0]
+    
     while QBest > 1:
         
-        calidadParada = unimodalSeparable(s, contEvaluacion)
-        QS = calidadParada[0]
-        contEvaluacion = calidadParada[1]
-        if contEvaluacion == NMEFO:
-            break
-        #print("Calidad de S: ", QS, contEvaluacion)
-        
-        
-        calidadParada = unimodalSeparable(best, contEvaluacion)
-        QBest = calidadParada[0]
-        contEvaluacion = calidadParada[1]
-        if contEvaluacion == NMEFO:
-            break
-        #print("Calidad de best: ", QBest, contEvaluacion)
-        
-        
+
+        #print("Calidad de S: ", QS)
+        #print("Calidad de best: ", QBest)
+         
         # llamamos funcion de probabilidades y aplicamos el twick a R
+        #print("===============Evaluacion de los vecinos====================")
         tw_R = genracionTW (s)
         #print(f"Tw de R: {tw_R}")
         R=aplicar_tweck(s, tw_R)
-        
+        #print("vector R", R)
         # Calculamos calidad de R
         
         calidadParada = unimodalSeparable(R, contEvaluacion)
@@ -189,8 +184,8 @@ for z in range(0,30):
             
             
             # Evaluo distancia euclidiana con la lista tabu
-            
-            '''print("********************************************************")
+            '''
+            print("===============Evaluacion distancioa euclidiana====================")
             print("lista L", L)
             print("vector W", W)
             print("vector R", R)
@@ -208,7 +203,7 @@ for z in range(0,30):
             if (distanciaEuclidianaW==len(L)) and (QW<QR) or (distanciaEuclidianaR != len(L)):
                 R = W
                 QR = QW
-                #print("Se cumple")
+                #print("Se cumple 1 ciclo")
                 #print(f"Distancia euclidiana W {distanciaEuclidianaW}")
                 #print(f"Distancia euclidiana R {distanciaEuclidianaR}")
             
@@ -217,27 +212,30 @@ for z in range(0,30):
         #print ("Valor final de R despues de los vecinos", R)  
                     
         # Evaluacion distancia euclidiana 2
-
+        #print("==================evaluo distancia eucludiana 2 ciclo==========================")
         ListaDistanciasEuclidianasR = funcion_distancia_euclidiana(L, R)
         #print("distancia euclidiana R final", ListaDistanciasEuclidianasR)
         distanciaEuclidianaR = comprobar_distancia_euclidiana(ListaDistanciasEuclidianasR, 0.1)
         #print("Valor final de los vecinos R", distanciaEuclidianaR)
         if (distanciaEuclidianaR==len(L)) and QR < QS:
-            #print("Se cumple 2")
+            #print("Se cumple 2 ciclo")
             s = R
             QS = QR
             L.append(R)
             
-            # Elimino el elemento mas viejo
-            if len(L) > longitudListaTabu:
-                L.pop(0)
-            #print("Lista final despues de todo el procedimiento:",L)
+        # Elimino el elemento mas viejo
+        if len(L) > longitudListaTabu:
+            L.pop(0)
+        #print("Lista final despues de todo el procedimiento:",L)
 
         if QS < QBest:    
             best = s
-
+            QBest = QS
+        print("========================")
+        print("Calidad de S final: ", QS)
+        print("Calidad de best final: ", QBest)
+        print("========================")
     print("Best Final iteracion: ",z," Calidad Best: ",QBest)
-    
     # Guardamos los resultados en el excel para posteriores analisis
     # ==============================================================================
     dicc = {"Best": best,
@@ -249,15 +247,12 @@ for z in range(0,30):
 
     with pd.ExcelWriter("resultados_tabu.xlsx",engine="openpyxl", mode = 'a', if_sheet_exists="overlay"
                         ) as writer:
-        df.to_excel(writer, index=None, header = None, startrow=cont, sheet_name="20_dim_US_v2")
+        df.to_excel(writer, index=None, header = None, startrow=cont, sheet_name="20_dim_US_v3")
 
     cont  = cont+1
     dicc = dict()
     
-    
-    
-    
-        
+
     
         
     
