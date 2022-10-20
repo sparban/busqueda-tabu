@@ -14,56 +14,62 @@ rango = [-100, 100]
 NMEFO = 5000  # maximo numero de evaluaciones de la funcion objetivo
 cont = 1
 dicc = dict()
+seleccion = 1
+# 1. Funcion Unimodal Separable | Sphere
+# 2. Funcion unimodal No Separable |  Griewank
+# 3. Funcion Multimodal separable( MS) | Rastrigin [-5.12, 5.12]
+# 4. Funcion Multimodal No Separable (MNS) | Ackley [-32, 32]
 
 # Definicion de las Funciones Objetivo
 # ==============================================================================
 
 # Funcion Unimodal Separable | Sphere
-def unimodalSeparable(s,contEvaluacion): 
-    contEvaluacion += 1
-    y = 0
-    for i in range(len(s)):
-        y = round((s[i]*s[i]) + y, 2)
+
+def funciones_matematicas (seleccion, s, contEvaluacion):
+
+    if seleccion == 1:
+        # unimodalSeparable(s,contEvaluacion):
+        contEvaluacion += 1
+        y = 0
+        for i in range(len(s)):
+            y = round((s[i]*s[i]) + y, 2)
+        
+        return (y, contEvaluacion)
     
-    return (y, contEvaluacion)
+    elif seleccion == 2:
+        # Funcion unimodal No Separable |  Griewank
+        # cv: varaible de control
+        cv = 0         
+        y =0
+        contEvaluacion += 1
+        for i in range(len(s)):
+            cv = (s[i]+cv)
+            y = cv*cv + y
+        
+        return (y, contEvaluacion)
 
 
-# Funcion unimodal No Separable |  Griewank
-def unimodalNoSeparable(s, contEvaluacion):
-    # cv: varaible de control
-    cv = 0         
-    y =0
-    contEvaluacion += 1
-    for i in range(len(s)):
-        cv = (s[i]+cv)
-        y = cv*cv + y
-    
-    return (y, contEvaluacion)
+        # Funcion Multimodal separable( MS) | Rastrigin [-5.12, 5.12]
+    elif seleccion == 3:
+        y = 0
+        contEvaluacion += 1
+        for i in range(0,len(s)):
+            y = ((s[i])**2 -10*math.cos(2*math.pi*s[i]) + 10) + y
+        
+        return (y, contEvaluacion)
 
+    elif seleccion == 4:
+        # Variables de control
+        pt_g = 0
+        st_g = 1
+        contEvaluacion += 1
+        for i in range(0,len(s)):
+            pt_g = (1/4000)* s[i] + pt_g
+            st_g = (math.cos(s[i])/math.sqrt(i+1))*st_g
+        
+        y = pt_g - st_g +1
 
-# Funcion Multimodal separable( MS) | Rastrigin [-5.12, 5.12]
-def multimodalSeparable(s, contEvaluacion):
-    y = 0
-    contEvaluacion += 1
-    for i in range(0,len(s)):
-        y = ((s[i])**2 -10*math.cos(2*math.pi*s[i]) + 10) + y
-    
-    return (y, contEvaluacion)
-
-
-def multimodalNoSeparable(s, contEvaluacion):
-    # Variables de control
-    pt_g = 0
-    st_g = 1
-    contEvaluacion += 1
-    for i in range(0,len(s)):
-        pt_g = (1/4000)* s[i] + pt_g
-        st_g = (math.cos(s[i])/math.sqrt(i+1))*st_g
-    
-    y = pt_g - st_g +1
-
-    return (y, contEvaluacion)
-
+        return (y, contEvaluacion)
 
 
 # Vector solucion Inicial
@@ -137,10 +143,10 @@ for z in range(0,30):
     L.append(s)   # agregamos la solucion inicial S a la lista tabu
     best = s
 
-    calidadParada = unimodalSeparable(s, contEvaluacion)
+    calidadParada = funciones_matematicas(seleccion, s, contEvaluacion)
     QS = calidadParada[0]
     
-    calidadParada = unimodalSeparable(best, contEvaluacion)
+    calidadParada = funciones_matematicas(seleccion, best, contEvaluacion)
     QBest = calidadParada[0]
     
     while QBest > 1:
@@ -157,7 +163,7 @@ for z in range(0,30):
         #print("vector R", R)
         # Calculamos calidad de R
         
-        calidadParada = unimodalSeparable(R, contEvaluacion)
+        calidadParada = funciones_matematicas(seleccion, R, contEvaluacion)
         QR = calidadParada[0]
         contEvaluacion = calidadParada[1]
         if contEvaluacion == NMEFO:
@@ -174,7 +180,7 @@ for z in range(0,30):
             #print(f"Vector W: {W}")
             
             # Evaluammos W
-            calidadParada = unimodalSeparable(W, contEvaluacion)
+            calidadParada = funciones_matematicas(seleccion, W, contEvaluacion)
             QW = calidadParada[0]
             contEvaluacion = calidadParada[1]
             if contEvaluacion == NMEFO:
@@ -231,10 +237,6 @@ for z in range(0,30):
         if QS < QBest:    
             best = s
             QBest = QS
-        print("========================")
-        print("Calidad de S final: ", QS)
-        print("Calidad de best final: ", QBest)
-        print("========================")
     print("Best Final iteracion: ",z," Calidad Best: ",QBest)
     # Guardamos los resultados en el excel para posteriores analisis
     # ==============================================================================
