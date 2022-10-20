@@ -7,8 +7,8 @@ import numpy as np
 
 # Definimos las variables iniciales
 #==============================================================================
-longitudPermanencia = 4 # longitud de la lista tabu  (50, 100, 150)
-n = 4  # numero de vecinos  (10, 20)
+longitudPermanencia = 5 # longitud de la lista tabu  (50, 100, 150)
+n = 10  # numero de vecinos  (10, 20)
 r = 1 # paso del tweak  (0.2, 06, 1.0)
 nDim = 20 # numero de dimensiones de la funsion  (20, 50, 100)
 rango = [-100, 100]
@@ -101,7 +101,7 @@ def genracionTW (s):
 def aplicar_tweck (s,tw, ListaCaractersiticas, numCarModificar):
     Generaltwick = []
     listaProbabillidad = GenerarVectorProbabilidad(s, ListaCaractersiticas, numCarModificar)
-    print(listaProbabillidad)
+    #print(listaProbabillidad)
     for i in range(len(s)):
         if listaProbabillidad[i] > 0.5:
             Generaltwick.append(s[i]+tw[i])
@@ -134,7 +134,7 @@ def lista_caracteristicas_modificadas(lista1):
 def GenerarVectorProbabilidad(s, ListaCaractersiticas, numCarModificar):
     # dimensiones del la solucion inicial s=9
     numberDim = list(range(len(s)))
-    print("Numero de dimensiones: ",numberDim)
+    #print("Numero de dimensiones: ",numberDim)
     # Se crea el vector de probabilidads de ceros proporcional al  tamaño de las dimensiones
     probabilidades = np.zeros(len(numberDim))
 
@@ -142,11 +142,11 @@ def GenerarVectorProbabilidad(s, ListaCaractersiticas, numCarModificar):
     for i in range(len(ListaCaractersiticas)):
         numberDim.remove(ListaCaractersiticas[i])
 
-    print("Nuvo vector Eliminadas Caracteristicas: ",numberDim)
+    #print("Nuvo vector Eliminadas Caracteristicas: ",numberDim)
     
     CaractersiticasCambiar = np.random.choice(numberDim, numCarModificar, False)
     # Se selcciona el nuemro de varaibles modificar decuerdo nDim/l
-    print("Los numero seleccionados son: ",CaractersiticasCambiar)
+    #print("Los numero seleccionados son: ",CaractersiticasCambiar)
     # Remplzamos las caracteriticas a cambiar vector de probabilidades (caracteristicas 1 : cambiaron)
     for j in range(len(CaractersiticasCambiar)):
             probabilidades[CaractersiticasCambiar[j]]= 1
@@ -163,7 +163,7 @@ listaCondicionesModificadas = []
 C = 0   # Contador de la iteracion actual
 contEvaluacion = 0   # variable para almacenar la NMEFO
 s = vectorSolution(nDim)
-print("Vector S inicial", s)
+print("Vector s inicial", s)
 best = s
 
 calidadParada = funciones_matematicas(seleccion, s, contEvaluacion)
@@ -172,59 +172,67 @@ QS = calidadParada[0]
 calidadParada = funciones_matematicas(seleccion, best, contEvaluacion)
 QBest = calidadParada[0]
 
+print("Calidad best original", QBest)
+
 iteracionActual = 0
 numCarModificar = int(len(s)/longitudPermanencia)
 #print("Calidad de S: ", QS)
 #print("Calidad de best: ", QBest)
-while iteracionActual < 10:
+while QBest > 1:
 
     if iteracionActual > 0:
         iteracionActual += 1
         listaCondicionesModificadas = []
         # Remover tuplas de la forma
-        
-        for i in range(len(listaCaracteristicas)):
+        cont = 0
+        while (cont < len(listaCaracteristicas)):
             #print("iteracion actual", iteracionActual )
-            #print("iiteracion almacenada" ,listaCaracteristicas[i][1])
-            if iteracionActual - listaCaracteristicas[i][1] >= longitudPermanencia:
-                listaCaracteristicas.remove(listaCaracteristicas[i])
+            #print("iiteracion almacenada" ,listaCaracteristicas[cont][1])
+            if iteracionActual - listaCaracteristicas[cont][1] >= longitudPermanencia:
+                listaCaracteristicas.pop(cont)
+                cont = 0
             else:
-                listaCondicionesModificadas.append(listaCaracteristicas[i][0])
+                listaCondicionesModificadas.append(listaCaracteristicas[cont][0])
+                cont += 1
         # Lista de las caracteristicas modificadas
         listaCaraModi=lista_caracteristicas_modificadas(listaCondicionesModificadas)
         
         tw_R = genracionTW (s)
-        print(f"Tw de R: {tw_R}")
+        #print(f"Tw de R: {tw_R}")
         R=aplicar_tweck(s, tw_R, listaCaraModi, numCarModificar)
-        print("vector R", R)
+        #print("vector R", R)
         # Calculamos calidad de R
         calidadParada = funciones_matematicas(seleccion, R, contEvaluacion)
         QR = calidadParada[0]
         contEvaluacion = calidadParada[1]
-        print("Calidad de R", QR)
+        if contEvaluacion == NMEFO:
+            break
+        #print("Calidad de R", QR)
         # Generamos los vecinos
         for i in range(0,n-1):
             tw_W = genracionTW(s)
-            print(f"Tw de W: {tw_W}")
+            #print(f"Tw de W: {tw_W}")
             # Aplicamos Twick a W
             W = aplicar_tweck(s, tw_W, listaCaraModi, numCarModificar)
-            print(f"Vector W: {W}")
-            
+            #print(f"Vector W: {W}")
             # Evaluammos W
             calidadParada = funciones_matematicas(seleccion, W, contEvaluacion)
+            if contEvaluacion == NMEFO:
+                break
             QW = calidadParada[0]
             contEvaluacion = calidadParada[1]
             if contEvaluacion == NMEFO:
                 break   
-            print(f"calidad de W: ", QW, contEvaluacion)
+            #print(f"calidad de W: ", QW, contEvaluacion)
             if (QW<QR):
                 R = W
                 QR = QW
-                print("=========================================")
-                print("Calidad de R ", QR)
-                
-        print("Vector S", s)
-        print("Vector R", R)
+                #print("=========================================")
+                #print("Calidad de R ", QR)
+        if contEvaluacion == NMEFO:
+            break
+        #print("Vector S", s)
+        #print("Vector R", R)
       
         ListaTupla =  creacion_tuplas(s,R,iteracionActual)   
         listaCaracteristicas.append(ListaTupla)
@@ -233,9 +241,9 @@ while iteracionActual < 10:
         if QS < QBest:
             Best = s
             QBest = QS
-        print("Calidad de best", QBest)
-        print("Proyeccion de la lista", listaCaracteristicas)
-        print("*****************************************************************")
+        #print("Calidad de best", QBest)
+        #print("Proyeccion de la lista", listaCaracteristicas)
+        #print("*****************************************************************")
 
     else:
         iteracionActual += 1
@@ -277,8 +285,9 @@ while iteracionActual < 10:
         if QS < QBest:
             Best = s
             QBest = QS
-        print("*****************************************************************")
-        print("Calidad de best", QBest)
-        print("Proyeccion de la lista", listaCaracteristicas)
+        #print("*****************************************************************")
+        #print("Calidad de best", QBest)
+        #print("Proyeccion de la lista", listaCaracteristicas)
         
-            
+print("Calidad de best final", QBest)
+print("Vector S final", s)
