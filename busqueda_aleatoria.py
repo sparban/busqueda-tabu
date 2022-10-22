@@ -20,9 +20,9 @@ NMEFO = 5000
 nombreHojaExcell = str(dimencions)+"_BusquedaAleatoria"
 NombreDocumento = "funsion"+str(seleccion)+"_BusquedaAleatoria.xlsx"
 # 1. Funcion Unimodal Separable | Sphere            [-100, 100]
-# 2. Funcion unimodal No Separable |  Griewank      [-100, 100]
+# 2. Funcion unimodal No Separable | Schwefel      [-100, 100]
 # 3. Funcion Multimodal separable( MS) | Rastrigin  [-5.12, 5.12]
-# 4. Funcion Multimodal No Separable (MNS) | Ackley [-600, 600]
+# 4. Funcion Multimodal No Separable (MNS) | Griewank [-600, 600]
 
 # Definicion de las Funciones Objetivo
 # ==============================================================================
