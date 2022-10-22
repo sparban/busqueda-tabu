@@ -51,6 +51,7 @@ Repetir
     if Qs < Qbest entinces:
         Best <-- s
         QBest <-- Qs
-        
+    if len(L)>longitudListaTabu entonces:
+        Remuevo elemento mas viejo
 Hasta Best sea la solucion ideal o NMEFO = 5000
 Return Best, Qbest
