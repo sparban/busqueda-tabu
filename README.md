@@ -22,3 +22,5 @@ Longitud de la lista (tabu original):   50, 100 y 150
 Longitud de permanencia (tabu cm):      5, 10 y 15
 
 Para la evaluacion se determina un maximo de 5000 evaluaciones maximas de la funcion objetivo o cuando el valor a minimizar sea cercano a 0.
+
+Nota: Se necesita crear los archivos excel con el nombre especificado en el codigo para correr los algoritmos
